@@ -2,10 +2,11 @@
     项目会生成两个lib：blocklink_libbitcoin_secp256k1.lib  blocklink_libbitcoin.lib
 
 2. 编译项目, 然后install： blocklink_crosschain_privatekey/third_libs目录下会多出blocklink_libbitcoin_secp256k1.lib  blocklink_libbitcoin.lib
+   blocklink项目中crosschain_privatekey_management子项目调用
 
-3. 整个blocklink项目使用
-整个blocklink项目编译时，cmake需加入CROSSCHAIN_PRIVATEKEY_PROJECT环境变量（也就是在setenv_x64.bat中设置）：
-以下为我的示例：
+3. blocklink项目中crosschain_privatekey_management子项目调用
+   整个blocklink项目编译时，cmake需加入CROSSCHAIN_PRIVATEKEY_PROJECT环境变量（也就是在setenv_x64.bat中设置）：
+可以参照的示例：
 @echo off
 set GRA_ROOT=E:\blocklink_project
 set OPENSSL_ROOT=%GRA_ROOT%\OpenSSL.x64
