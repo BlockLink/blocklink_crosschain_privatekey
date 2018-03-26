@@ -38,7 +38,7 @@ typedef byte_array<message_signature_size> message_signature;
 /**
  * Hashes a messages in preparation for signing.
  */
-BC_API hash_digest hash_message(data_slice message);
+BC_API hash_digest hash_message(data_slice message, const std::string& prefix = "Bitcoin Signed Message:\n");
 
 /**
  * Signs a message using deterministic signature.
@@ -47,7 +47,7 @@ BC_API hash_digest hash_message(data_slice message);
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& signature, data_slice message,
-    const ec_private& secret);
+	const ec_private& secret, const std::string& prefix = "Bitcoin Signed Message:\n");
 
 /**
  * Signs a message using deterministic signature.
@@ -56,7 +56,7 @@ BC_API bool sign_message(message_signature& signature, data_slice message,
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature, data_slice message,
-    const std::string& wif);
+	const std::string& wif, const std::string& prefix = "Bitcoin Signed Message:\n");
 
 /**
  * Signs a message using deterministic signature.
@@ -67,7 +67,7 @@ BC_API bool sign_message(message_signature& out_signature, data_slice message,
  * @return true if signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature, data_slice message,
-    const ec_secret& secret, bool compressed=true);
+	const ec_secret& secret, bool compressed = true, const std::string& prefix = "Bitcoin Signed Message:\n");
 
 /**
  * Verifies a message.

@@ -35,11 +35,10 @@ static constexpr uint8_t magic_differential = magic_compressed - magic_uncompres
 static_assert(magic_differential > max_recovery_id, "oops!");
 static_assert(max_uint8 - max_recovery_id >= magic_uncompressed, "oops!");
 
-hash_digest hash_message(data_slice message)
+hash_digest hash_message(data_slice message,const std::string& prefix)
 {
     // This is a specified magic prefix.
-    static const std::string prefix("Bitcoin Signed Message:\n");
-
+    //static const std::string prefix("Bitcoin Signed Message:\n");
     data_chunk data;
     data_sink ostream(data);
     ostream_writer sink(ostream);
@@ -113,24 +112,24 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
 }
 
 bool sign_message(message_signature& signature, data_slice message,
-    const ec_private& secret)
+    const ec_private& secret,const std::string& prefix)
 {
-    return sign_message(signature, message, secret, secret.compressed());
+    return sign_message(signature, message, secret, secret.compressed(),prefix);
 }
 
 bool sign_message(message_signature& signature, data_slice message,
-    const std::string& wif)
+    const std::string& wif,const std::string& prefix)
 {
     ec_private secret(wif);
     return (secret &&
-        sign_message(signature, message, secret, secret.compressed()));
+        sign_message(signature, message, secret, secret.compressed(),prefix));
 }
 
 bool sign_message(message_signature& signature, data_slice message,
-    const ec_secret& secret, bool compressed)
+    const ec_secret& secret, bool compressed,const std::string& prefix )
 {
     recoverable_signature recoverable;
-    if (!sign_recoverable(recoverable, secret, hash_message(message)))
+    if (!sign_recoverable(recoverable, secret, hash_message(message,prefix)))
         return false;
 
     uint8_t magic;
