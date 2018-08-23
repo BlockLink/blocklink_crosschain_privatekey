@@ -57,7 +57,7 @@ std::vector<Element>& distinct(std::vector<Element>& list);
  * @return             The position or -1 if not found.
  */
 template <typename Pair, typename Key>
-int find_pair_position(const std::vector<const Pair>& list, Key& key);
+int find_pair_position(const std::vector<Pair>& list, Key& key);
 
 /**
  * Find the position of an element in an ordered list.
