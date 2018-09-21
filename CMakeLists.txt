@@ -40,8 +40,16 @@ if (Boost_FOUND)
 else (Boost_FOUND)
 	message(STATUS "cannot found Boost library!")
 endif()
-
-
+include(CheckCXXCompilerFlag)  
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)  
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)  
+if(COMPILER_SUPPORTS_CXX11)  
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")   
+elseif(COMPILER_SUPPORTS_CXX0X)  
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")  
+else()  
+    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")  
+endif()  
 # build library blocklink libbitcoin
 message(STATUS "build library blocklink_libbitcoin_secp256k1")
 set( CMAKE_AUTOMOC OFF )
@@ -52,7 +60,8 @@ set( BLOCKLINK_LIBBITCOIN_SECP256K1_DIR "${CMAKE_CURRENT_SOURCE_DIR}/secp256k1" 
 file( GLOB BLOCKLINK_LIBBITCOIN_SECP256K1_SOURCES "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}/src/secp256k1.c" )
 add_library( blocklink_libbitcoin_secp256k1 ${BLOCKLINK_LIBBITCOIN_SECP256K1_SOURCES} )
 
-target_include_directories( blocklink_libbitcoin_secp256k1 PRIVATE "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}" PUBLIC "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}/include" )
+target_include_directories( blocklink_libbitcoin_secp256k1 PRIVATE "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}" PUBLIC "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}/include" "${BLOCKLINK_LIBBITCOIN_SECP256K1_DIR}/src")
+IF (WIN32)
 target_compile_definitions( blocklink_libbitcoin_secp256k1 PUBLIC
 							ENABLE_MODULE_RECOVERY
 							ENABLE_MODULE_ECDH
@@ -69,19 +78,55 @@ target_compile_definitions( blocklink_libbitcoin_secp256k1 PUBLIC
 							WIN64
 							_WIN64   
 						 )
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall")
+target_compile_definitions( blocklink_libbitcoin_secp256k1 PUBLIC
+                                                        ENABLE_MODULE_RECOVERY
+                                                        ENABLE_MODULE_ECDH
+                                                        USE_SCALAR_8X32
+                                                        USE_FIELD_10X26
+                                                        USE_ENDOMORPHISM
+                                                        USE_NUM_NONE
+                                                        USE_FIELD_INV_BUILTIN
+                                                        USE_SCALAR_INV_BUILTIN
 
+	)
+  IF(APPLE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPP_STANDARD} -stdlib=libc++ -Wall")
+  ELSE()
+    if( NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+      target_compile_options(blocklink_libbitcoin_secp256k1 PUBLIC ${CPP_STANDARD} -Wall -fnon-call-exceptions)
+    endif()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPP_STANDARD} -Wall -fnon-call-exceptions")
+
+    if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+        if( CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.0.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.0.0 )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-partial-specialization" )
+        endif()
+    endif()
+  ENDIF()
+ENDIF()
 
 # End configure blocklink_libbitcoin_secp256k1
 
 message(STATUS "build library blocklink libbitcoin")
-
+AUX_SOURCE_DIRECTORY(libbitcoin/src/chain LIBBITCOIN_CHAIN)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/config LIBBITCOIN_CONFIG)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/formats LIBBITCOIN_FORMATS)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/log LIBBITCOIN_LOG)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/machine LIBBITCOIN_MACHINE)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/math LIBBITCOIN_MATH)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/message LIBBITCOIN_MESSAGE)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/unicode LIBBITCOIN_UNICODE)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/utility LIBBITCOIN_UTILITY)
+AUX_SOURCE_DIRECTORY(libbitcoin/src/wallet LIBBITCOIN_WALLET)
 file(GLOB_RECURSE blocklink_libbitcoin_header_files ${CMAKE_CURRENT_SOURCE_DIR}/libbitcoin/include/*.hpp  ${CMAKE_CURRENT_SOURCE_DIR}/libbitcoin/include/*.h)
 file(GLOB_RECURSE blocklink_libbitcoin_source_files ${CMAKE_CURRENT_SOURCE_DIR}/libbitcoin/src/*.c   ${CMAKE_CURRENT_SOURCE_DIR}/libbitcoin/src/*.cpp)
 
 add_library(blocklink_libbitcoin STATIC
             ${blocklink_libbitcoin_header_files}
-			${blocklink_libbitcoin_source_files})
-
+			${blocklink_libbitcoin_source_files} ${LIBBITCOIN_CHAIN} ${LIBBITCOIN_CONFIG} ${LIBBITCOIN_FORMATS} ${LIBBITCOIN_LOG} ${LIBBITCOIN_MACHINE} ${LIBBITCOIN_MATH} ${LIBBITCOIN_MESSAGE} ${LIBBITCOIN_UNICODE} ${LIBBITCOIN_UTILITY} ${LIBBITCOIN_WALLET})
+IF(WIN32)
 target_compile_definitions( blocklink_libbitcoin PUBLIC
 							SECP256K1_STATIC
 							BC_STATIC
@@ -96,6 +141,30 @@ target_compile_definitions( blocklink_libbitcoin PUBLIC
 							WIN64
 							_WIN64
 							)
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall")
+target_compile_definitions( blocklink_libbitcoin PUBLIC
+                                                        SECP256K1_STATIC
+                                                        BC_STATIC
+                                                        WITH_ICU
+                                                        NOMINMAX
+)
+  IF(APPLE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPP_STANDARD} -stdlib=libc++ -Wall")
+  ELSE()
+    if( NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+      target_compile_options(blocklink_libbitcoin PUBLIC ${CPP_STANDARD} -Wall -fnon-call-exceptions)
+    endif()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPP_STANDARD} -Wall -fnon-call-exceptions")
+
+    if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+        if( CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.0.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.0.0 )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-partial-specialization" )
+        endif()
+    endif()
+  ENDIF()
+
+ENDIF()
 target_include_directories(blocklink_libbitcoin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libbitcoin/include  ${BOOST_ROOT}/ ${LIBBITCOIN_SECP256K1_DIR}/include)
 target_link_libraries(blocklink_libbitcoin PUBLIC blocklink_libbitcoin_secp256k1 ${Boost_LIBRARIES})
 
