@@ -5,7 +5,7 @@
  **********************************************************************/
 
 #include "include/secp256k1.h"
-
+#ifdef _WIN32  
 #include "util.h"
 #include "num_impl.h"
 #include "field_impl.h"
@@ -18,6 +18,21 @@
 #include "eckey_impl.h"
 #include "hash_impl.h"
 #include "scratch_impl.h"
+#else
+#include "src/util.h"
+#include "src/num_impl.h"
+#include "src/field_impl.h"
+#include "src/scalar_impl.h"
+#include "src/group_impl.h"
+#include "src/ecmult_impl.h"
+#include "src/ecmult_const_impl.h"
+#include "src/ecmult_gen_impl.h"
+#include "src/ecdsa_impl.h"
+#include "src/eckey_impl.h"
+#include "src/hash_impl.h"
+#include "src/scratch_impl.h"
+#endif
+
 
 #define ARG_CHECK(cond) do { \
     if (EXPECT(!(cond), 0)) { \
