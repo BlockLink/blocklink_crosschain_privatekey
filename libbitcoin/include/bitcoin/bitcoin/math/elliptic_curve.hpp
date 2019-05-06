@@ -171,6 +171,8 @@ BC_API bool encode_signature(der_signature& out, const ec_signature& signature);
 /// Create a deterministic ECDSA signature using a private key.
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash);
+BC_API bool sign_bch(ec_signature& out, const ec_secret& secret,
+	const hash_digest& hash);
 
 /// Verify an EC signature using a compressed point.
 BC_API bool verify_signature(const ec_compressed& point,
@@ -189,7 +191,7 @@ BC_API bool verify_signature(data_slice point, const hash_digest& hash,
 
 /// Create a recoverable signature for use in message signing.
 BC_API bool sign_recoverable(recoverable_signature& out,
-    const ec_secret& secret, const hash_digest& hash);
+    const ec_secret& secret, const hash_digest& hash,bool bBch = false);
 
 /// Recover the compressed point from a recoverable message signature.
 BC_API bool recover_public(ec_compressed& out,

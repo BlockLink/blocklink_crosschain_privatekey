@@ -322,6 +322,18 @@ bool sign(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
     std::copy_n(std::begin(signature.data), out.size(), out.begin());
     return true;
 }
+bool sign_bch(ec_signature& out, const ec_secret& secret, const hash_digest& hash)
+{
+	secp256k1_ecdsa_signature signature;
+	const auto context = signing.context();
+
+	if (libbitcoin_secp256k1_ecdsa_sign_bch(context, &signature, hash.data(), secret.data(),
+		libbitcoin_secp256k1_nonce_function_rfc6979, nullptr) != 1)
+		return false;
+
+	std::copy_n(std::begin(signature.data), out.size(), out.begin());
+	return true;
+}
 
 bool verify_signature(const ec_compressed& point, const hash_digest& hash,
     const ec_signature& signature)
@@ -367,17 +379,26 @@ bool verify_signature(data_slice point, const hash_digest& hash,
 // ----------------------------------------------------------------------------
 
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
-    const hash_digest& hash)
+    const hash_digest& hash, bool bBch)
 {
     int recovery_id;
     const auto context = signing.context();
     secp256k1_ecdsa_recoverable_signature signature;
-
-    const auto result =
-        secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
-            secret.data(), libbitcoin_secp256k1_nonce_function_rfc6979, nullptr) == 1 &&
-        secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
-            out.signature.data(), &recovery_id, &signature) == 1;
+	bool result;
+	if (bBch){
+		result =
+			secp256k1_ecdsa_sign_recoverable_bch(context, &signature, hash.data(),
+				secret.data(), libbitcoin_secp256k1_nonce_function_rfc6979, nullptr) == 1 &&
+			secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
+				out.signature.data(), &recovery_id, &signature) == 1;
+	} else {
+		result =
+			secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
+				secret.data(), libbitcoin_secp256k1_nonce_function_rfc6979, nullptr) == 1 &&
+			secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
+				out.signature.data(), &recovery_id, &signature) == 1;
+	}
+    
 
     BITCOIN_ASSERT(recovery_id >= 0 && recovery_id <= 3);
     out.recovery_id = safe_to_unsigned<uint8_t>(recovery_id);

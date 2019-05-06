@@ -503,6 +503,14 @@ SECP256K1_API int libbitcoin_secp256k1_ecdsa_sign(
     const void *ndata
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
 
+SECP256K1_API int libbitcoin_secp256k1_ecdsa_sign_bch(
+	const secp256k1_context* ctx,
+	secp256k1_ecdsa_signature *sig,
+	const unsigned char *msg32,
+	const unsigned char *seckey,
+	secp256k1_nonce_function noncefp,
+	const void *ndata
+) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
 /** Verify an ECDSA secret key.
  *
  *  Returns: 1: secret key is valid
