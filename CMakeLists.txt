@@ -79,7 +79,8 @@ target_compile_definitions( blocklink_libbitcoin_secp256k1 PUBLIC
 							_WIN64   
 						 )
 ELSE()
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 target_compile_definitions( blocklink_libbitcoin_secp256k1 PUBLIC
                                                         ENABLE_MODULE_RECOVERY
                                                         ENABLE_MODULE_ECDH
@@ -142,7 +143,8 @@ target_compile_definitions( blocklink_libbitcoin PUBLIC
 							_WIN64
 							)
 ELSE()
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 target_compile_definitions( blocklink_libbitcoin PUBLIC
                                                         SECP256K1_STATIC
                                                         BC_STATIC
